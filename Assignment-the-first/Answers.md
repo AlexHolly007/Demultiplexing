@@ -30,82 +30,81 @@
    4. Return statement
 
 Strategy for Demultiplexing
-	•	Initial requirements
-	◦	Read1 file is Bio1, Read2 is index1, Read3 is Index2, and Read4 is Bio2
-	◦	Each line number in all 4 files line up with the other line # in other files. So entry 8 from file 1 (READ 1), is from the same dna strand as entry 8 from file 4 (READ 4)
-	◦	We have 24 indexes that will be the barcodes on the reads, each one of these will need 2 output files, 1 for the read1s and 1 for read2s.
-	◦	Need to take the reverse compliment of read3 barcode, and reverse compliment of read4 sequence. For it to line up with first read & barcode
-	◦	if the barcodes match within a single paired read, put the two reads into the indexes output files.
-	▪	 If both barcodes exist, but don't match, you put in an unmatched file, again with two output file 1 and 2 for the unmatched reads
-	▪	For unmatched pairs, write the two indexes   <idx1>-<idx2> at the end of the header for both reads
-	▪	If one of the barcodes doesn't exist, put they two reads in the unknown two output files
-	▪	For unmatched pairs
-	◦	48 index outputs + 2 unmatched outputs + 2 unknown outputs
-	◦	STATS output total read-paris that matched, were unmatched, and were unknown
-	•	Pseudo code
+* Initial requirements
+* Read1 file is Bio1, Read2 is index1, Read3 is Index2, and Read4 is Bio2
+* Each line number in all 4 files line up with the other line # in other files. So entry 8 from file 1 (READ 1), is from the same dna strand as entry 8 from file 4 (READ 4)
+* We have 24 indexes that will be the barcodes on the reads, each one of these will need 2 output files, 1 for the read1s and 1 for read2s.
+* Need to take the reverse compliment of read3 barcode, and reverse compliment of read4 sequence. For it to line up with first read & barcode
+* if the barcodes match within a single paired read, put the two reads into the indexes output files.
+* If both barcodes exist, but don't match, you put in an unmatched file, again with two output file 1 and 2 for the unmatched reads
+* For unmatched pairs, write the two indexes   <idx1>-<idx2> at the end of the header for both reads
+* If one of the barcodes doesn't exist, put they two reads in the unknown two output files
+* For unmatched pairs
+* 48 index outputs + 2 unmatched outputs + 2 unknown outputs
+* STATS output total read-paris that matched, were unmatched, and were unknown
+* Pseudo code
 
 
 MAIN
-	•	Getargs
-	◦	all 4 files of reads
-	◦	minimum qual score
-	◦	Read length
-	◦	Barcode file input
-	•	Create dictionary of the swapped pairs possible
-	•	Create the sums of the counts of paired, unpaired, unknown
-	•	With open all 4 files
-	◦	Take 4 lines from each file * store them in lists that are 4 length and named after each read
-	▪	Take the reverse compliment of the index3 (with function below)
-	▪	See if index 2 and index 3 match and if they both exist
-	▪	Take the quality scores of the two indexes
-	▪	If either one is below the threshold, then toss em both.
-	▪	If they do and match, open output files with the name of the barcode ‘{barcodeName}_r1.fq’   and   ‘{barcodeName}_r2.fq’
-	▪	Write to R1 and R2
-	▪	The header + indexes ‘<index>-<index>’
-	▪	sequences
-	▪	Quality scores
-	▪	Count matched pairs +1
-	▪	Write read 1 to R1, read 2 to R2
-	▪	If they both exist but don't match, open the unmatched files: ‘unmatched_R1.fq’   and  ‘unmatched_R2.fq’
-	▪	Count to the dictionary of different unmapped pairs
-	▪	Write to R1 and R2
-	▪	The header + indexes ‘<index>-<index>’
-	▪	sequences
-	▪	Quality scores
-	▪	Count unmatched pairs +1
-	▪	If one or both don't exist, open the unknown output files: ‘unknown_R1.fq’    and   ‘unknown_R2.fq’
-	▪	Write to R1 and R2
-	▪	The header + indexes ‘<index>-<index>’
-	▪	sequences
-	▪	Quality scores
-	▪	Write to R1 and R2
-	▪	Count unknown pairs +1
-	•	RETURN COUNTS OF mapped, unmapped, unknown, and sorted list of the unmatched pairs that are together
+* Getargs
+  * all 4 files of reads
+  * minimum qual score
+  * Read length
+  * Barcode file input
+* Create dictionary of the swapped pairs possible
+* Create the sums of the counts of paired, unpaired, unknown
+* With open all 4 files
+  * Take 4 lines from each file * store them in lists that are 4 length and named after each read
+     * Take the reverse compliment of the index3 (with function below)
+     * See if index 2 and index 3 match and if they both exist
+     * Take the quality scores of the two indexes
+     	* If either one is below the threshold, then toss em both.
+     * If they do and match, open output files with the name of the barcode ‘{barcodeName}_r1.fq’   and   ‘{barcodeName}_r2.fq’
+     	* Write to R1 and R2
+     	   * The header + indexes ‘<index>-<index>’
+      	   * sequences
+           * Quality scores
+     	* Count matched pairs +1
+      	* Write read 1 to R1, read 2 to R2
+     * If they both exist but don't match, open the unmatched files: ‘unmatched_R1.fq’   and  ‘unmatched_R2.fq’
+     	* Count to the dictionary of different unmapped pairs
+        * Write to R1 and R2
+           * The header + indexes ‘<index>-<index>’
+           * sequences
+           * Quality scores
+        * Count unmatched pairs +1
+     * If one or both don't exist, open the unknown output files: ‘unknown_R1.fq’    and   ‘unknown_R2.fq’
+     	* Write to R1 and R2
+      	   * The header + indexes ‘<index>-<index>’
+           * sequences
+           * Quality scores
+        * Count unknown pairs +1
+* RETURN COUNTS OF mapped, unmapped, unknown, and sorted list of the unmatched pairs that are together
 
 FUNCTIONS
-	•	Get args functions
-	◦	Bring in the 4 files as 4 inputs
-	◦	Read length,
-	◦	Minimum quality score
-	◦	Barcode file name
+- Get args functions
+  - Bring in the 4 files as 4 inputs
+    - Read length,
+    - Minimum quality score
+    - Barcode file name
 
-	•	Mean Convert fred quality score
-	◦	Converts a sequence to a fred quality score
+- Mean Convert fred quality score
+  - Converts a sequence to a fred quality score
 
-	•	Implement reverse compliment function (takes in dna strand) 
-	◦	Returns the reverse compliment 
+- Implement reverse compliment function (takes in dna strand)
+  - Returns the reverse compliment 
 
 
 TEST FILES
-	•	Input
-	◦	Finished input CHA-CHING
-	◦	Have 4 records for each of the 4 read files.
-	▪	 Sequences are random valid sequences for each of them
-	▪	1 case where the indexes match correctly
-	▪	1 case where they are both valid, but don't match
-	▪	1 case where one is not valid, should be unknown
-	▪	1 case where the quality score is low for one of them (9 mean), even though the barcodes are good and match
-	◦	Also have indexes input file that is valid for 2 barcodes
-	•	Output
-	◦	Need to make output
+- Input
+  - Finished input CHA-CHING
+  - Have 4 records for each of the 4 read files.
+    - Sequences are random valid sequences for each of them
+      - 1 case where the indexes match correctly
+      - 1 case where they are both valid, but don't match
+      - 1 case where one is not valid, should be unknown
+      - 1 case where the quality score is low for one of them (9 mean), even though the barcodes are good and match
+  - Also have indexes input file that is valid for 2 barcodes
+- Output
+  - Need to make output
 
