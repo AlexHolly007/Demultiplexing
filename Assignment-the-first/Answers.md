@@ -34,7 +34,7 @@ Strategy for Demultiplexing
 * Read1 file is Bio1, Read2 is index1, Read3 is Index2, and Read4 is Bio2
 * Each line number in all 4 files line up with the other line # in other files. So entry 8 from file 1 (READ 1), is from the same dna strand as entry 8 from file 4 (READ 4)
 * We have 24 indexes that will be the barcodes on the reads, each one of these will need 2 output files, 1 for the read1s and 1 for read2s.
-* Need to take the reverse compliment of read3 barcode, and reverse compliment of read4 sequence. For it to line up with first read & barcode
+* Need to take the reverse compliment of read3 barcode. For it to line up with first read & barcode
 * if the barcodes match within a single paired read, put the two reads into the indexes output files.
 * If both barcodes exist, but don't match, you put in an unmatched file, again with two output file 1 and 2 for the unmatched reads
 * For unmatched pairs, write the two indexes   <idx1>-<idx2> at the end of the header for both reads
@@ -58,7 +58,10 @@ MAIN
      * Take the reverse compliment of the index3 (with function below)
      * See if index 2 and index 3 match and if they both exist
      * Take the quality scores of the two indexes
-     	* If either one is below the threshold, then toss em both.
+     	* If either is below the quality score Write to the unknown files.
+        * The header + indexes ‘<index>-<index>’
+        * sequences
+        * Quality scores
      * If they do and match, open output files with the name of the barcode ‘{barcodeName}_r1.fq’   and   ‘{barcodeName}_r2.fq’
      	* Write to R1 and R2
      	   * The header + indexes ‘<index>-<index>’
