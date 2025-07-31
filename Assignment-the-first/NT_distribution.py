@@ -24,6 +24,8 @@ def populate_list(file: str) -> tuple:
         for i, line in enumerate(fh):
             if i % 4 == 3:
                 record_count += 1
+                if record_count % 10000000 == 0:
+                    print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p1: {record_count}")
                 for j, letter in enumerate(line.strip()):
                     my_list[j] += bioinfo.convert_phred(str(letter))
 
@@ -38,6 +40,8 @@ def populate_list(file: str) -> tuple:
     with gzip.open(file, 'rt') as fh:
         for i, line in enumerate(fh):
             if i % 4 == 3:
+                if (i/4) % 10000000 == 0:
+                    print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p2: {record_count}")
                 for j, letter in enumerate(line.strip()):
                     var[j] += (bioinfo.convert_phred(str(letter)) - phred_means[j])**2
 
