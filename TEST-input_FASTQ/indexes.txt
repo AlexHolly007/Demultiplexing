@@ -1,0 +1,2 @@
+1       2A      control B1      GTAGCGTA
+2       2B      control A5      CGATCGAT
