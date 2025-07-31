@@ -5,7 +5,7 @@ import numpy as np
 import math as m
 import matplotlib.pyplot as plt
 
-TESTING = False
+TESTING = True
 
 def populate_list(file: str) -> tuple:
     """Update with your own docstring"""
@@ -20,15 +20,22 @@ def populate_list(file: str) -> tuple:
         record_count += 1
 
         for i, letter in enumerate(first_record[3].strip()):
-                    my_list[i] += bioinfo.convert_phred(chr(letter))
+                    my_list[i] += (ord(chr(letter)) - 33)
         
-        for i, line in enumerate(fh):
-            if i % 4 == 3:
-                record_count += 1
-                if record_count % 10000000 == 0:
+        while True:
+            head = fh.readline()
+            if not head:
+                break
+            _ = fh.readline()
+            _ = fh.readline()
+            qual= fh.readline()
+            record_count += 1
+            
+            if record_count % 10000000 == 0:
                     print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p1: {record_count}")
-                for j, letter in enumerate(line.strip()):
-                    my_list[j] += bioinfo.convert_phred(chr(letter))
+                    
+            for j, letter in enumerate(qual.strip()):
+                my_list[j] += (ord(chr(letter)) - 33)
 
     phred_means = my_list / record_count
 
@@ -44,7 +51,7 @@ def populate_list(file: str) -> tuple:
                 if (i/4) % 10000000 == 0:
                     print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p2: {record_count}")
                 for j, letter in enumerate(line.strip()):
-                    var[j] += (bioinfo.convert_phred(chr(letter)) - phred_means[j])**2
+                    var[j] += ((ord(chr(letter)) - 33) - phred_means[j])**2
 
     var = var / record_count
 
