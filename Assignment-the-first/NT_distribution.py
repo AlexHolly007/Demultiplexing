@@ -4,7 +4,7 @@ import numpy as np
 import math as m
 import matplotlib.pyplot as plt
 
-TESTING = True
+TESTING = False
 
 def populate_list(file: str) -> tuple:
     """Update with your own docstring"""
@@ -37,13 +37,13 @@ def populate_list(file: str) -> tuple:
 
     var = np.zeros(seq_len, dtype=float)
 
-    with gzip.open(file, 'rt') as fh:
+    with gzip.open(file, 'rb') as fh:
         for i, line in enumerate(fh):
             if i % 4 == 3:
                 if (i/4) % 10000000 == 0:
                     print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p2: {record_count}")
                 for j, letter in enumerate(line.strip()):
-                    var[j] += (bioinfo.convert_phred(str(letter)) - phred_means[j])**2
+                    var[j] += (bioinfo.convert_phred(chr(letter)) - phred_means[j])**2
 
     var = var / record_count
 
