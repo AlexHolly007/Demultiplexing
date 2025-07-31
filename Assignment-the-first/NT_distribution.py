@@ -4,22 +4,22 @@ import numpy as np
 import math as m
 import matplotlib.pyplot as plt
 
-
-TESTING = False
-
+TESTING = True
 
 def populate_list(file: str) -> tuple:
     """Update with your own docstring"""
     my_list = None
     record_count = 0
-    with gzip.open(file, 'rt') as fh:
+    with gzip.open(file, 'rb') as fh:
         first_record = [fh.readline() for _ in range(4)]
         seq_len = len(first_record[1])-1
+        if TESTING:
+            assert(seq_len == 8), "seq_length not correct"
         my_list = np.zeros(seq_len, dtype=float)
         record_count += 1
 
         for i, letter in enumerate(first_record[3].strip()):
-                    my_list[i] += bioinfo.convert_phred(str(letter))
+                    my_list[i] += bioinfo.convert_phred(chr(letter))
         
         for i, line in enumerate(fh):
             if i % 4 == 3:
@@ -27,7 +27,7 @@ def populate_list(file: str) -> tuple:
                 if record_count % 10000000 == 0:
                     print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p1: {record_count}")
                 for j, letter in enumerate(line.strip()):
-                    my_list[j] += bioinfo.convert_phred(str(letter))
+                    my_list[j] += bioinfo.convert_phred(chr(letter))
 
     phred_means = my_list / record_count
 
