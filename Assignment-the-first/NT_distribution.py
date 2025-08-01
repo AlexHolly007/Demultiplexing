@@ -5,7 +5,7 @@ import numpy as np
 import math as m
 import matplotlib.pyplot as plt
 
-TESTING = True
+TESTING = False
 
 def populate_list(file: str) -> tuple:
     """Update with your own docstring"""
@@ -14,6 +14,7 @@ def populate_list(file: str) -> tuple:
     with gzip.open(file, 'rb') as fh:
         first_record = [fh.readline() for _ in range(4)]
         seq_len = len(first_record[1])-1
+        print("uh oh")
         if TESTING:
             assert(seq_len == 8), "seq_length not correct"
         my_list = np.zeros(seq_len, dtype=float)
@@ -31,6 +32,8 @@ def populate_list(file: str) -> tuple:
             qual= fh.readline()
             record_count += 1
             
+            if record_count == 1000:
+                print("1000")
             if record_count % 10000000 == 0:
                     print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p1: {record_count}")
                     
