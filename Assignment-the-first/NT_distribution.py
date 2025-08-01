@@ -23,22 +23,15 @@ def populate_list(file: str) -> tuple:
         for i, letter in enumerate(first_record[3].strip()):
                     my_list[i] += (ord(chr(letter)) - 33)
         
-        while True:
-            head = fh.readline()
-            if not head:
-                break
-            _ = fh.readline()
-            _ = fh.readline()
-            qual= fh.readline()
-            record_count += 1
-            
-            if record_count == 1000:
-                print("1000")
-            if record_count % 10000000 == 0:
-                    print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p1: {record_count}")
-                    
-            for j, letter in enumerate(qual.strip()):
-                my_list[j] += (ord(chr(letter)) - 33)
+        for i, line in enumerate(fh):
+            if i % 4 == 3:
+                record_count += 1
+                
+                if record_count % 10000000 == 0:
+                        print(f"{file[file.find("_R")+1:file.find("_R")+3]} lines p1: {record_count}")
+                        
+                for j, letter in enumerate(line.strip()):
+                    my_list[j] += (ord(chr(letter)) - 33)
 
     phred_means = my_list / record_count
 
@@ -70,7 +63,10 @@ def populate_list(file: str) -> tuple:
     plt.title(f"{file[file.find("_R")+1:file.find("_R")+3]}Mean error plt")
     plt.xlabel("Score position")
     plt.ylabel("Qual score")
-    plt.savefig(f"{file[file.find("_R")+1:file.find("_R")+3]}.png")
+    if TESTING:
+        plt.savefig(f"{file[file.find("_R")+1:file.find("_R_test")+3]}.png")
+    else:
+        plt.savefig(f"{file[file.find("_R")+1:file.find("_R")+3]}.png")
 
 
     return phred_means, var, stdev, record_count
