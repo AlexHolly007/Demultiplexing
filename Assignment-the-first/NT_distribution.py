@@ -67,6 +67,7 @@ def populate_list(file: str) -> tuple:
         plt.savefig(f"{file[file.find("_R")+1:file.find("_R_test")+3]}.png")
     else:
         plt.savefig(f"{file[file.find("_R")+1:file.find("_R")+3]}.png")
+    plt.clf()
 
 
     return phred_means, var, stdev, record_count
