@@ -5,14 +5,14 @@ import gzip
 import os
 
 #maps each nucleotide to its compliment
-C_DICT = {'A':'T', 'T':'A', 'G':'C', 'C':'G'}
+C_DICT = {'A':'T', 'T':'A', 'G':'C', 'C':'G', 'N':'N'}
 #Maps each barcode to its matching group name
 BARCODE_MAP = {}
 #hold all the open files for each index
 FILE_DICT = {}
 
 #holds each found barcode pair. Both matching and index hopped
-MATCH_DICT: dict[str, int] = {}
+MATCH_DICT = {}
 
 
 #Reverse compliment of a DNA sequence that is sent in
@@ -26,6 +26,7 @@ def fill_file_dict(index_file: str, output_dir: str):
     os.makedirs(output_dir, exist_ok=True)
 
     with open(index_file) as fi:
+        _ = fi.readline()
         for line in fi:
 
             #create two files for each index
@@ -33,7 +34,7 @@ def fill_file_dict(index_file: str, output_dir: str):
             for i in range(2):
                 ft = open(f'{output_dir}/{index}_R{i+1}.fq', 'w')
 
-                FILE_DICT[f'{index}_R{i+1}'] = [ft, 0]
+                FILE_DICT[f'{index}_R{i+1}'] = ft
 
             #Fill the barcode mapping for this index
             barcode = line.split()[4]
@@ -128,14 +129,14 @@ def main(R1, R2, R3, R4, cutoff, idx_file, output_dir, output_file):
         fo.write('\t-----------------------STATISTIC REPORT FROM DEMULTIPLEXING-----------------\n\n')
         fo.write(f"Quality score cutoff: {cutoff}\n")
         fo.write(f'Total Reads: {unknown_indexes + properly_matched + index_hopped}\n\n')
-        fo.write(f'Matched Reads Found: {properly_matched} - ({(properly_matched/(unknown_indexes+properly_matched+index_hopped))*100}%)\n')
-        fo.write(f'Index Hopped Reads: {index_hopped} - ({(index_hopped/(unknown_indexes+properly_matched+index_hopped))*100}%)\n')
-        fo.write(f'Unknown index Reads: {unknown_indexes} - ({(unknown_indexes/(unknown_indexes+properly_matched+index_hopped))*100}%)\n\n\n')
+        fo.write(f'Matched Reads Found: {properly_matched} - ({round((properly_matched/(unknown_indexes+properly_matched+index_hopped)),4)*100}%)\n')
+        fo.write(f'Index Hopped Reads: {index_hopped} - ({round((index_hopped/(unknown_indexes+properly_matched+index_hopped)),4)*100}%)\n')
+        fo.write(f'Unknown index Reads: {unknown_indexes} - ({round((unknown_indexes/(unknown_indexes+properly_matched+index_hopped)),4)*100}%)\n\n\n')
 
         #Statistics
         fo.write('\tIndividual Index pair percentages & total values:\n\n')
         for index_pair_key in sorted(MATCH_DICT, key=lambda k: MATCH_DICT[k], reverse=True):
-            fo.write(f'{index_pair_key}: {MATCH_DICT[index_pair_key]} - ({MATCH_DICT[index_pair_key]/(index_hopped+properly_matched)}%)\n')
+            fo.write(f'{index_pair_key}: {MATCH_DICT[index_pair_key]} - ({round(MATCH_DICT[index_pair_key]/(index_hopped+properly_matched),4)*100}%)\n')
 
 
 
@@ -146,7 +147,7 @@ def get_args():
     parser.add_argument("-R2", "--read2", required=True, type=str, help="the read2 file output from sequencing. THIS SHOULD BE A GZ FILE.")
     parser.add_argument("-R3", "--read3", required=True, type=str, help="the read3 file output from sequencing. THIS SHOULD BE A GZ FILE.")
     parser.add_argument("-R4", "--read4", required=True, type=str, help="the read4 file output from sequencing. THIS SHOULD BE A GZ FILE.")
-    parser.add_argument('-c','--cutoff', required=False, default=0, type=str, help="The minimum of what the mean quality score of an index needs to be for it to be not thrown to unknown")
+    parser.add_argument('-c','--cutoff', required=False, default=0, type=int, help="The minimum of what the mean quality score of an index needs to be for it to be not thrown to unknown")
     parser.add_argument('-i','--index_file', required=True, type=str, help="The index file is what gives names and barcodes to each index that can be found")
     parser.add_argument('-o', '--output_dir', required=True, type=str, help='The name of a directory to store the output index files')
     parser.add_argument('-os', '--statistic_output', required=True, type=str, help='The text output file for the statistics')
@@ -158,4 +159,4 @@ def get_args():
 
 if __name__ == "__main__":
     args = get_args()
-    main(args.read1, args.read2, args.read3, args.read4, args.cutoff, args.index_file, args.output_dir, args.statistic_output)
+    main(args.read1, args.read2, args.read3, args.read4, int(args.cutoff), args.index_file, args.output_dir, args.statistic_output)
